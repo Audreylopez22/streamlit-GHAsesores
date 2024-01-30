@@ -1,0 +1,8 @@
+credentials:
+  names: ['Audrey Lopez', 'William Vargas', 'Andrea Stand']
+  usernames: ['audrey', 'william', 'andrea']
+  passwords: ['', '', ''] 
+cookie:
+  name: nomina
+  key:  nomina_key
+  expiry_days: 1
