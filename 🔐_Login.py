@@ -13,7 +13,7 @@ with open('./config.yaml', 'r') as file:
         config = yaml.load(file, Loader=SafeLoader)
 
 for i, username in enumerate(config['credentials']['usernames']):
-        config['credentials']['passwords'][i] = st.secrets.paswords[username]
+        config['credentials']['passwords'][i] = st.secrets.passwords[username]
        
 def main():
 
