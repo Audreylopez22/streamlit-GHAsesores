@@ -86,7 +86,6 @@ def main():
             st.session_state.file_hash = hash(uploaded_file_contents)
         
         st.session_state.data = load_data_from_excel(uploaded_file)
-        log_message("Reading the entered file")
         #st.write(st.session_state.data)
     
         workbook = openpyxl.load_workbook(uploaded_file)
@@ -99,6 +98,7 @@ def main():
         else:
 
             progress_bar = st.progress(0.0)
+            log_message("Reading the entered file")
             log_message("Making modifications to the Excel file...")
                 
             workbook = process_rules(workbook, progress_bar)
