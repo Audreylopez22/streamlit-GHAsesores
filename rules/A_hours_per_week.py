@@ -2,13 +2,11 @@ from datetime import datetime, timedelta
 from tools import log_message
 import streamlit as st
 from dateutil import rrule
-from overtime_functios import calculate_night_surcharges_hours, daytime_overtime_per_week,calculate_day_surcharges_hour
+from overtime_functios import calculate_night_surcharges_hours, calculate_day_surcharges_hour,calculate_night_overtime_and_holydays,calculate_daytime_holidays_hour, calculate_daytime_overtime
 
 config=st.session_state.config
 period=st.session_state.period
 
-#st.write(config)
-#st.write(period)
 
 def define_weeks(sheet):
     tables_info=[]
@@ -102,7 +100,7 @@ def extract_data(sheet, weeks_info):
             holidays=[h-week_info["col_min"] for h in week_info["holidays"]]
             
             total_week_hours = 0 
-            daytime_overtime= 0
+
             #recargos nocturnos
             night_surchage_week= 0
             total_night_surcharges=0
@@ -113,7 +111,20 @@ def extract_data(sheet, weeks_info):
             total_holidays_surchages=0
             holidays_surchage_week=0
             
-            #st.write(employe_name)
+            # horas extra nocturnas
+            total_night_overtime=0
+            night_overtime_week=0
+            # horas extra noctunas dom-fes
+            total_holidays_night_overtime=0
+            holidays_night_overtime_week=0
+            # horas extra dom-festivo dia
+            daytime_holidays_week =0
+            total_daytime_holidays =0
+            # horas extra diurnas normal
+            daytime_overtime_week = 0
+            total_daytime_overtime =0
+            
+            # st.write(employe_name)
             for i in range (0,len(list(row)),2):
                   
                 if row[i] and row[i + 1]:
@@ -124,28 +135,30 @@ def extract_data(sheet, weeks_info):
                     except Exception as error:
                         print(error)
                         continue
+                    
                     worked_hours = abs((exit_datetime - entry_datetime).total_seconds() / 3600)
                     
+                    if worked_hours >= config.getint(period, 'max_hours_discount_lunch'):
+                        worked_hours= worked_hours-1
+                    
                     #CUIDADO AQUI NO TIENE EN CUENTA SI LOS RECARGOS NOCTURNOS SON FESTIVOS
-                    night_surchage_pay,night_surcharges_hours, night_holidays_surchage_pay,night_holidays_surcharges_hours=calculate_night_surcharges_hours(hour_rate,entry_datetime,worked_hours,i,holidays)
+                    night_surchage_pay,night_surcharges_hours, night_holidays_surchage_pay,night_holidays_surcharges_hours=calculate_night_surcharges_hours(hour_rate,entry_datetime,worked_hours,i,holidays, total_week_hours)
                     #night normal week surcharges
                     night_surchage_week += night_surchage_pay
                     total_night_surcharges+=night_surcharges_hours
                     #night holidays surcharges
                     total_night_holidays_surcharges += night_holidays_surchage_pay
                     night_holidays_surchage_week += night_holidays_surcharges_hours
-                    
-                    
 
-                    # st.write("worked_hours")
-                    # st.write(worked_hours)
+                    #st.write("worked_hours")
+                    #st.write(worked_hours)
                     # st.write(night_surchage_pay)
                     # st.write("night_surcharges_hours")
                     # st.write(night_surcharges_hours)
                     # st.write(night_holidays_surchage_pay)
                     # st.write(night_holidays_surcharges_hours)
                     
-                    holidays_surchage_hour, holidays_surchage_pay=calculate_day_surcharges_hour(hour_rate,entry_datetime,worked_hours, i,holidays)
+                    holidays_surchage_hour, holidays_surchage_pay=calculate_day_surcharges_hour(hour_rate,entry_datetime,worked_hours, i,holidays,total_week_hours)
                     
                     #day holidays surcharges
                     
@@ -159,19 +172,43 @@ def extract_data(sheet, weeks_info):
                     # st.write("holidays_surchage_pay")
                     # st.write("total_holidays_surchages")
                     # discount for lunch after max_hours_discount_lunch in config.ini
-                    if worked_hours >= config.getint(period, 'max_hours_discount_lunch'):
-                        worked_hours= worked_hours-1
+                    #se calcula hora extra diruna
+                    daytime_overtime_hours, daytime_overtime_pay=calculate_daytime_overtime(hour_rate,entry_datetime,worked_hours, i, holidays, total_week_hours)
+                    
+                    # horas extra diurnas normal
+                    daytime_overtime_week += daytime_overtime_hours
+                    total_daytime_overtime += daytime_overtime_pay
+                    
+                    
+                    #se calcula hora extra nocturna y noc dom-fes
+                    
+                    night_overtime_pay,night_overtime_hours, night_holidays_overtime_pay,night_holidays_overtime_hours=calculate_night_overtime_and_holydays(hour_rate,entry_datetime,worked_hours, i, holidays,total_week_hours)
+                    
+                    # horas extra nocturnas
+                    night_overtime_week += night_overtime_pay
+                    total_night_overtime += night_overtime_hours
+                    # st.write(night_overtime_hours)
+                    # st.write(total_night_overtime)
+                    
+                    # horas extra noctunas dom-fes
+                    holidays_night_overtime_week += night_holidays_overtime_hours 
+                    total_holidays_night_overtime += night_holidays_overtime_pay
+                    
+                    #se calcula hora extra festiva 
+                    daytime_holidays_hours, daytime_holidays_pay=calculate_daytime_holidays_hour(hour_rate,entry_datetime,worked_hours, i, holidays,total_week_hours)
+                    
+                    # horas extra dom -fest
+                    daytime_holidays_week += daytime_holidays_hours
+                    total_daytime_holidays += daytime_holidays_pay
+                    
+                    
                         
                     total_week_hours += worked_hours
+                    # st.write(worked_hours)
+                    # st.write(total_week_hours)
                     
                     #Trae el limite de horas por semana del archivo de configuracion
-                    if total_week_hours> config.getint(period, 'max_hours_per_week'):
-                        #se calcula hora extra diruna
-                        #se calcula hora extra nocturna
-                        #se calcula hora extra festiva 
-                        extra_hour= total_week_hours-config.getint(period, 'max_hours_per_week')
-                        daytime_overtime= round(daytime_overtime_per_week(hour_rate)*extra_hour)
-                        
+
                     extracted_data[week_name][employe_name] = {
                         "hour_rate": hour_rate,
                         "salary": employe_salary,
@@ -181,7 +218,15 @@ def extract_data(sheet, weeks_info):
                         "night_holidays_surcharges_hours": night_holidays_surchage_week,
                         "night_holidays_surchage_pay": total_night_holidays_surcharges,
                         "day_holidays_surcharges_hours":holidays_surchage_week,
-                        "day_holidays_surchage_pay": total_holidays_surchages
+                        "day_holidays_surchage_pay": total_holidays_surchages,
+                        "night_overtime_hours": total_night_overtime,
+                        "night_overtime_pay" : night_overtime_week,
+                        "night_holidays_overtime_hours": holidays_night_overtime_week,
+                        "night_holidays_overtime_pay": total_holidays_night_overtime,
+                        "daytime_holidays_hours": daytime_holidays_week,
+                        "daytime_holidays_pay": total_daytime_holidays,
+                        "daytime_overtime_hours":daytime_overtime_week,
+                        "daytime_overtime_pay": total_daytime_overtime
                         
                     }
                     
