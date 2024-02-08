@@ -5,7 +5,9 @@ from openpyxl.utils import get_column_letter
 
 def create_sheet_for_week(workbook, sheet):
     extracted_data = st.session_state.extracted_data
-    for idx, week_info in enumerate(extracted_data, start=1):
+    weeks_info = st.session_state.weeks_info
+
+    for idx, week_info in enumerate(weeks_info, start=1):
         week_name = "week {}".format(idx)
         new_sheet = workbook.create_sheet(week_name)
 
@@ -13,16 +15,19 @@ def create_sheet_for_week(workbook, sheet):
             col_letter = get_column_letter(col)
             new_sheet.column_dimensions[col_letter].width = 15
 
-        create_table(new_sheet, extracted_data[week_name])
+        week_title = week_info["week_title"]
+        create_table(new_sheet, week_title, extracted_data[week_name])
 
         money_style = get_or_create_money_style(workbook)
 
         for col in ["B", "E", "G", "I", "K", "M", "O", "Q", "R"]:
             for cell in new_sheet[col]:
                 cell.style = money_style
+                cell.number_format = "$#,##0"
 
 
-def create_table(sheet, week_data):
+def create_table(sheet, week_title, week_data):
+    sheet.append([week_title])
     sheet.append(
         [
             "Colaborador",

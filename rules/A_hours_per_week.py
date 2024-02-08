@@ -22,6 +22,7 @@ def define_weeks(sheet):
     names = []
     salary = []
     hour_rate = []
+    week_name = ""
     max_hours_per_month = config.getint(period, "max_hours_per_month")
 
     for row1, row2 in zip(
@@ -63,7 +64,7 @@ def define_weeks(sheet):
                 if celda.value is not None and str(celda.value).startswith("Lunes"):
                     # cambiar a inicio de semana en ingles
                     start_week = celda.column
-
+                    week_name = celda.value
                 if (
                     celda.value is not None
                     and start_week
@@ -87,9 +88,11 @@ def define_weeks(sheet):
                             "salary": tableinfo["salary"],
                             "hour_rate": tableinfo["hour_rate"],
                             "holidays": holidays,
+                            "week_title": f"Semana {week_name} al {celda.value}",
                         }
                     )
                     start_week = ""
+                    week_name = ""
                     holidays = []
 
     # st.write("tables_info")
@@ -274,6 +277,7 @@ def extract_data(sheet, weeks_info):
 
             key_row += 1
     # st.write(extracted_data)
+    st.session_state["weeks_info"] = weeks_info
     st.session_state["extracted_data"] = extracted_data
     log_message("The information was compiled by workweek.")
 
