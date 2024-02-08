@@ -24,7 +24,7 @@ Welcome to GH Asesores Payroll Processor! This application has been developed to
 
 1.  **Excel File Format:** Ensure that the Excel file contains only one data sheet. The first column should contain the list of collaborators, while the subsequent columns should represent the working days to be analyzed.
 
-2.  **Workweek:** The program will only consider workweeks from Monday to Sunday. If a week is incomplete, it will not be taken into account for calculations.
+2.  **Workweek:** The program will only consider workweeks from Monday to Sunday. If a week is incomplete, it will not be taken into account for calculations. Additionally, if a week, even if complete, is divided between two tables, the program will not consider it as a complete week and will not include it in the calculations.
 
 3.  **Entry and Exit Time Format:** It is crucial that entry and exit records follow the 12-hour time format, followed by 'a.m.' or 'p.m.'. For example: 6:00:00 a.m. If the records do not comply with this format, they will not be included in the calculations.
 
