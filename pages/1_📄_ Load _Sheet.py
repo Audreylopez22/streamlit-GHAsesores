@@ -2,7 +2,6 @@ import streamlit as st
 import openpyxl
 from tools import log_message
 from io import BytesIO
-import os
 import importlib
 import configparser
 
@@ -40,24 +39,27 @@ def load_data_from_excel(uploaded_file):
 
 
 def process_rules(workbook, progress_bar):
-    rule_files = [
-        filename
-        for filename in os.listdir("rules")
-        if filename.endswith(".py") and filename not in ["__init__.py"]
-    ]
-    total_steps = len(rule_files)
-    sorted_files = sorted(rule_files)
+    try:
+        rule_files = [
+            "A_hours_per_week.py",
+            "B_sheet_for_week.py",
+            "C_create_simple_sheet.py",
+            "D_process_simple_sheet.py",
+        ]
+        total_steps = len(rule_files)
 
-    for i, filename in enumerate(sorted_files):
-        if filename.endswith(".py") and filename not in ["__init__.py"]:
+        for i, filename in enumerate(rule_files):
             rule_module_name = f"rules.{filename[:-3]}"
             rule = importlib.import_module(rule_module_name)
             if hasattr(rule, "main") and callable(rule.main):
                 workbook = rule.main(workbook, progress_bar)
 
-        # For the progres bar
-        progress_percentage = min(1.0, (i + 1) / total_steps)
-        progress_bar.progress(progress_percentage)
+            # For the progres bar
+            progress_percentage = min(1.0, (i + 1) / total_steps)
+            progress_bar.progress(progress_percentage)
+
+    except Exception as error:
+        print(error)
 
     return workbook
 
@@ -97,6 +99,7 @@ def main():
             st.session_state.file_hash = hash(uploaded_file_contents)
 
         st.session_state.data = load_data_from_excel(uploaded_file)
+
         # st.write(st.session_state.data)
 
         workbook = openpyxl.load_workbook(uploaded_file)

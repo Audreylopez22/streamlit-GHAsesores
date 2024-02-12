@@ -29,72 +29,79 @@ def define_weeks(sheet):
         sheet.iter_rows(min_col=1, max_col=1, min_row=1, max_row=sheet.max_column),
         sheet.iter_rows(min_col=2, max_col=2, min_row=1, max_row=sheet.max_column),
     ):
-        for cell1, cell2 in zip(row1, row2):
-            if cell1.value is not None and str(cell1.value) == "Colaborador":
-                colaborador = cell1.row
+        try:
+            for cell1, cell2 in zip(row1, row2):
+                if cell1.value is not None and str(cell1.value) == "Colaborador":
+                    colaborador = cell1.row
 
-            elif cell1.value is None and colaborador != "":
-                tables_info.append(
-                    {
-                        "row_min": colaborador - 1,
-                        "row_max": cell1.row - 1,
-                        "names": names,
-                        "salary": salary,
-                        "hour_rate": hour_rate,
-                    }
-                )
+                elif cell1.value is None and colaborador != "":
+                    tables_info.append(
+                        {
+                            "row_min": colaborador - 1,
+                            "row_max": cell1.row - 1,
+                            "names": names,
+                            "salary": salary,
+                            "hour_rate": hour_rate,
+                        }
+                    )
 
-                colaborador = ""
-                names = []
-                salary = []
-                hour_rate = []
+                    colaborador = ""
+                    names = []
+                    salary = []
+                    hour_rate = []
 
-            elif cell1.value is not None:
-                names.append(cell1.value)
-                if cell2.value is not None:
-                    salary.append(cell2.value)
-                    hour_rate.append(round(cell2.value / max_hours_per_month))
+                elif cell1.value is not None:
+                    names.append(cell1.value)
+                    if cell2.value is not None:
+                        salary.append(cell2.value)
+                        hour_rate.append(round(cell2.value / max_hours_per_month))
+        except Exception as error:
+            print(error)
+            continue
 
     # st.write(tables_info)
 
     # esto me da las semanas de trabajo
     for tableinfo in tables_info:
         for columna in sheet.iter_cols(min_row=tableinfo["row_min"], max_row=tableinfo["row_min"]):
-            for celda in columna:
-                if celda.value is not None and str(celda.value).startswith("Lunes"):
-                    # cambiar a inicio de semana en ingles
-                    start_week = celda.column
-                    week_name = celda.value
-                if (
-                    celda.value is not None
-                    and start_week
-                    and start_week <= celda.column < start_week + 15
-                    and celda.fill.start_color.rgb != "00000000"
-                ):
-                    holidays.append(celda.column)
+            try:
+                for celda in columna:
+                    if celda.value is not None and str(celda.value).startswith("Lunes"):
+                        # cambiar a inicio de semana en ingles
+                        start_week = celda.column
+                        week_name = celda.value
+                    if (
+                        celda.value is not None
+                        and start_week
+                        and start_week <= celda.column < start_week + 15
+                        and celda.fill.start_color.rgb != "00000000"
+                    ):
+                        holidays.append(celda.column)
 
-                if (
-                    celda.value is not None
-                    and str(celda.value).startswith("Domingo")
-                    and start_week != ""
-                ):
-                    weeks_info.append(
-                        {
-                            "row_min": tableinfo["row_min"] + 2,
-                            "row_max": tableinfo["row_max"],
-                            "col_min": start_week,
-                            "col_max": celda.column + 1,
-                            "names": tableinfo["names"],
-                            "salary": tableinfo["salary"],
-                            "hour_rate": tableinfo["hour_rate"],
-                            "holidays": holidays,
-                            "week_title": f"Semana {week_name} al {celda.value}",
-                        }
-                    )
-                    start_week = ""
-                    week_name = ""
-                    holidays = []
-
+                    if (
+                        celda.value is not None
+                        and str(celda.value).startswith("Domingo")
+                        and start_week != ""
+                    ):
+                        weeks_info.append(
+                            {
+                                "row_min": tableinfo["row_min"] + 2,
+                                "row_max": tableinfo["row_max"],
+                                "col_min": start_week,
+                                "col_max": celda.column + 1,
+                                "names": tableinfo["names"],
+                                "salary": tableinfo["salary"],
+                                "hour_rate": tableinfo["hour_rate"],
+                                "holidays": holidays,
+                                "week_title": f"Semana {week_name} al {celda.value}",
+                            }
+                        )
+                        start_week = ""
+                        week_name = ""
+                        holidays = []
+            except Exception as error:
+                print(error)
+                continue
     # st.write("tables_info")
     # st.write(tables_info)
     # st.write("weeks_info")
@@ -168,7 +175,6 @@ def extract_data(sheet, weeks_info):
                     if worked_hours >= config.getint(period, "max_hours_discount_lunch"):
                         worked_hours = worked_hours - 1
 
-                    # CUIDADO AQUI NO TIENE EN CUENTA SI LOS RECARGOS NOCTURNOS SON FESTIVOS
                     (
                         night_surchage_pay,
                         night_surcharges_hours,
