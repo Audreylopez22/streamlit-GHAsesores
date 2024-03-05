@@ -1,9 +1,12 @@
 import streamlit as st
 import openpyxl
 from tools import log_message
+import os
 from io import BytesIO
 import importlib
+import formulas
 import configparser
+import shutil
 
 
 st.set_page_config(page_title="Load Sheet", page_icon="📑", layout="wide")
@@ -89,8 +92,6 @@ def main():
     uploaded_file = st.file_uploader("Upload Excel File", type=["xlsx", "xls"])
 
     if uploaded_file is not None:
-        # to reset the session state when analizyded new information
-
         uploaded_file_contents = uploaded_file.read()
 
         if "file_hash" not in st.session_state or st.session_state.file_hash != hash(
@@ -118,12 +119,25 @@ def main():
             log_message("Reading the entered file")
             log_message("Making modifications to the Excel file...")
 
+            if os.path.exists("files"):
+                shutil.rmtree("files")
+
             workbook = process_rules(workbook, progress_bar)
 
             # the modified or processed file is saved in memory
             modified_file = BytesIO()
             log_message("Saving modifications to the Excel file...")
             workbook.save(modified_file)
+            output_folder = "files"
+
+            if not os.path.exists(output_folder):
+                os.makedirs(output_folder)
+                modified_file_path = os.path.join(output_folder, "modified_file_forms.xlsx")
+                workbook.save(modified_file_path)
+
+            xl_model = formulas.ExcelModel().loads("files/modified_file_forms.xlsx").finish()
+            xl_model.calculate()
+            xl_model.write(dirpath="files")
 
             # download button for the downloaded file that is in memory
             st.session_state.download_button = st.download_button(
