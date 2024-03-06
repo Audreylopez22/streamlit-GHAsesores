@@ -166,10 +166,11 @@ def main():
     if "tmp_file" not in st.session_state:
         st.warning("Cannot display data because no file has been uploaded.")
         return
-
+    st.write(st.session_state.tmp_file)
     directory, file_name = os.path.split(st.session_state.tmp_file)
     file_name_uppercase = file_name.upper()
     uppercased_file = os.path.join(directory, file_name_uppercase)
+    st.write(uppercased_file)
 
     if os.path.exists(uppercased_file):
         with open(uppercased_file, "rb") as file_content:
