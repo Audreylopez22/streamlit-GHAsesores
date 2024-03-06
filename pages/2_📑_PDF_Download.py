@@ -25,14 +25,6 @@ if (
     st.stop()
 
 
-if os.path.exists("files"):
-    file = os.listdir("files")
-    temp_filename = os.path.join("files", "modified_file_forms.xlsx")
-
-    with open(temp_filename, "rb") as file_content:
-        st.session_state.temp_file_content = file_content.read()
-
-
 def filter_and_display_data(sheet):
     if sheet.title == "SIMPLE SHEET":
         log_message(f"Filtering and displaying data for sheet: {sheet.title}")
@@ -171,11 +163,19 @@ def generar_pdf(data_row, pdf_path):
 
 
 def main():
-    if "temp_file_content" not in st.session_state:
+    if "tmp_file" not in st.session_state:
         st.warning("Cannot display data because no file has been uploaded.")
         return
 
-    uploaded_file_contents = st.session_state.temp_file_content
+    directory, file_name = os.path.split(st.session_state.tmp_file)
+    file_name_uppercase = file_name.upper()
+    uppercased_file = os.path.join(directory, file_name_uppercase)
+
+    if os.path.exists(uppercased_file):
+        with open(uppercased_file, "rb") as file_content:
+            st.session_state.tmp_file_content = file_content.read()
+
+    uploaded_file_contents = st.session_state.tmp_file_content
 
     workbook = load_workbook(io.BytesIO(uploaded_file_contents))
 
@@ -186,9 +186,9 @@ def main():
     for index, row in filtered_data.iterrows():
         colaborador = row["Colaborador"]
         pdf_filename = f"{colaborador}_reporte.pdf"
-        my_path = os.path.join("files", pdf_filename)
+        my_path = os.path.join("/tmp", pdf_filename)
         generar_pdf(row, my_path)
-        pdf_download_path = f"files/{colaborador}_reporte.pdf"
+        pdf_download_path = f"/tmp/{colaborador}_reporte.pdf"
 
         st.download_button(
             label=f"Descargar PDF de {colaborador}",

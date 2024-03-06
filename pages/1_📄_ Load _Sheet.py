@@ -6,7 +6,7 @@ from io import BytesIO
 import importlib
 import formulas
 import configparser
-import shutil
+from tempfile import NamedTemporaryFile
 
 
 st.set_page_config(page_title="Load Sheet", page_icon="📑", layout="wide")
@@ -119,8 +119,11 @@ def main():
             log_message("Reading the entered file")
             log_message("Making modifications to the Excel file...")
 
-            if os.path.exists("files"):
-                shutil.rmtree("files")
+            if os.path.exists("/tmp"):
+                files = os.listdir("/tmp")
+                for file in files:
+                    if file.endswith((".xlsx", ".XLSX", ".pdf", ".PDF")):
+                        os.unlink(os.path.join(os.sep, "tmp", file))
 
             workbook = process_rules(workbook, progress_bar)
 
@@ -128,16 +131,14 @@ def main():
             modified_file = BytesIO()
             log_message("Saving modifications to the Excel file...")
             workbook.save(modified_file)
-            output_folder = "files"
 
-            if not os.path.exists(output_folder):
-                os.makedirs(output_folder)
-                modified_file_path = os.path.join(output_folder, "modified_file_forms.xlsx")
-                workbook.save(modified_file_path)
+            with NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp_file:
+                st.session_state.tmp_file = tmp_file.name
+                workbook.save(tmp_file.name)
 
-            xl_model = formulas.ExcelModel().loads("files/modified_file_forms.xlsx").finish()
+            xl_model = formulas.ExcelModel().loads(st.session_state.tmp_file).finish()
             xl_model.calculate()
-            xl_model.write(dirpath="files")
+            xl_model.write(dirpath="/tmp")
 
             # download button for the downloaded file that is in memory
             st.session_state.download_button = st.download_button(
