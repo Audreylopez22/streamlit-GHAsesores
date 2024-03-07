@@ -257,7 +257,6 @@ def main():
         colaborador = row["Colaborador"]
         pdf_filename = f"{colaborador}_reporte.pdf"
         my_path = os.path.join("/tmp", pdf_filename)
-        st.write(full_start_date, full_end_date)
         generar_pdf(row, my_path, full_start_date, full_end_date)
         pdf_download_path = f"/tmp/{colaborador}_reporte.pdf"
 
