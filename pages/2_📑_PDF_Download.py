@@ -6,11 +6,12 @@ import pandas as pd
 import os
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
+import re
 
-st.set_page_config(page_title="PDF_Download", page_icon="📄", layout="wide")
+st.set_page_config(page_title="PDF Download", page_icon="📄", layout="wide")
 
-st.markdown("# PDF")
-st.sidebar.header("PDF_Download")
+st.markdown("# PDF Download")
+st.sidebar.header("PDF Download")
 
 if (
     "authentication_status" not in st.session_state
@@ -23,6 +24,40 @@ if (
         unsafe_allow_html=True,
     )
     st.stop()
+
+
+def date(month):
+    pattern = r"\b\d+\b"
+    data = st.session_state.weeks_info
+    year = st.session_state.period
+
+    first_week = data[0]
+    numbers = re.findall(pattern, first_week["week_title"])
+    start_date = numbers[0]
+    first_week["start_date"] = start_date
+
+    last_week = data[-1]
+    numbers = re.findall(pattern, last_week["week_title"])
+    end_date = numbers[1]
+    last_week["end_date"] = end_date
+
+    year_number = re.sub(r"\D", "", year)
+
+    if start_date >= end_date:
+        full_start_date = f"{start_date}/{month}/{year_number}"
+
+        if month == "12":
+            next_month = 1
+            next_year = int(year_number) + 1
+        else:
+            next_month = int(month) + 1
+            next_year = year_number
+        full_end_date = f"{end_date}/{next_month:02}/{next_year}"
+    else:
+        full_start_date = f"{start_date}/{month}/{year_number}"
+        full_end_date = f"{end_date}/{month}/{year_number}"
+
+    return full_start_date, full_end_date
 
 
 def filter_and_display_data(sheet):
@@ -39,7 +74,7 @@ def filter_and_display_data(sheet):
         return pd.DataFrame()
 
 
-def generar_pdf(data_row, pdf_path):
+def generar_pdf(data_row, pdf_path, full_start_date, full_end_date):
     image = os.path.join("reports", "Volante.jpg")
 
     try:
@@ -50,6 +85,16 @@ def generar_pdf(data_row, pdf_path):
 
             c.drawImage(image, x=0, y=0, width=width, height=height)
             c.setFontSize(8)
+            # date
+            x = 293
+            y = 682
+            start_date = str(full_start_date)
+            c.drawString(x, y, start_date)
+            x = 400
+            y = 682
+            end_date = str(full_end_date)
+            c.drawString(x, y, end_date)
+
             # Colaborador
             x = 150
             y = 666
@@ -157,9 +202,9 @@ def generar_pdf(data_row, pdf_path):
 
             c.showPage()
             c.save()
-        log_message(f"Se generó el PDF de {data_row['Colaborador']}")
+        log_message(f"The PDF was generated for  {data_row['Colaborador']}")
     except Exception as e:
-        st.error(f"Error al generar el PDF: {str(e)}")
+        st.error(f"Error generating the PDF: {str(e)}")
 
 
 def main():
@@ -182,17 +227,41 @@ def main():
 
     filtered_data = filter_and_display_data(workbook["SIMPLE SHEET"])
 
-    st.write("Filtered Data:")
+    months = {
+        "ENERO": "01",
+        "FEBRERO": "02",
+        "MARZO": "03",
+        "ABRIL": "04",
+        "MAYO": "05",
+        "JUNIO": "06",
+        "JULIO": "07",
+        "AGOSTO": "08",
+        "SEPTIEMBRE": "09",
+        "OCTUBRE": "10",
+        "NOVIEMBRE": "11",
+        "DICIEMBRE": "12",
+    }
+    for sheet_name in workbook.sheetnames:
+        if sheet_name in months:
+            # st.write(f"El nombre de la hoja '{sheet_name}' coincide con un mes.")
+            # st.write(f"El número correspondiente es: {months[sheet_name.upper()]}")
+            month = months[sheet_name.upper()]
+            full_start_date, full_end_date = date(month)
+            break
+        else:
+            st.write(f"The sheet name '{sheet_name}' does not match with any month.")
+
+    st.write("download the pdf by employee :")
 
     for index, row in filtered_data.iterrows():
         colaborador = row["Colaborador"]
         pdf_filename = f"{colaborador}_reporte.pdf"
         my_path = os.path.join("/tmp", pdf_filename)
-        generar_pdf(row, my_path)
+        generar_pdf(row, my_path, full_start_date, full_end_date)
         pdf_download_path = f"/tmp/{colaborador}_reporte.pdf"
 
         st.download_button(
-            label=f"Descargar PDF de {colaborador}",
+            label=f"Download PDF of {colaborador}",
             data=open(pdf_download_path, "rb"),
             file_name=pdf_filename,
             mime="application/pdf",
