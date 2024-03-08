@@ -89,6 +89,11 @@ def main():
 
     st.write("You selected:", period)
 
+    if os.path.exists("/tmp"):
+        for file in os.listdir("/tmp"):
+            if file.endswith((".xlsx", ".XLSX", ".pdf", ".PDF")):
+                os.unlink(os.path.join(os.sep, "tmp", file))
+
     uploaded_file = st.file_uploader("Upload Excel File", type=["xlsx", "xls"])
 
     if uploaded_file is not None:
@@ -118,12 +123,6 @@ def main():
             progress_bar = st.progress(0.0)
             log_message("Reading the entered file")
             log_message("Making modifications to the Excel file...")
-
-            if os.path.exists("/tmp"):
-                files = os.listdir("/tmp")
-                for file in files:
-                    if file.endswith((".xlsx", ".XLSX", ".pdf", ".PDF")):
-                        os.unlink(os.path.join(os.sep, "tmp", file))
 
             workbook = process_rules(workbook, progress_bar)
 
