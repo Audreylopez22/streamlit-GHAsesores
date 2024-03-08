@@ -27,6 +27,7 @@ welcome = "Welcome to GH Asesores payroll Processor!"
 
 st.markdown(f"# {welcome}")
 st.sidebar.header(welcome)
+st.session_state.temp_file_content = None
 
 st.write(
     """ Here you can upload your Excel file to perform various operations. Start by selecting your file using the 'Upload Excel File' button. The application will automatically check if the file contains the necessary data. If so, it will proceed to calculate overtime hours and surcharges for each employee, depending on the number of weeks included in the file."""
@@ -91,7 +92,6 @@ def main():
 
     if os.path.exists("/tmp"):
         for file in os.listdir("/tmp"):
-            st.write(os.listdir("/tmp"))
             if file.endswith((".xlsx", ".XLSX", ".pdf", ".PDF")):
                 os.unlink(os.path.join(os.sep, "tmp", file))
 
@@ -136,6 +136,7 @@ def main():
                 st.session_state.tmp_file = tmp_file.name
                 workbook.save(tmp_file.name)
 
+            log_message("Loading...")
             xl_model = formulas.ExcelModel().loads(st.session_state.tmp_file).finish()
             xl_model.calculate()
             xl_model.write(dirpath="/tmp")
