@@ -208,7 +208,7 @@ def generar_pdf(data_row, pdf_path, full_start_date, full_end_date):
 
 
 def main():
-    if "tmp_file" not in st.session_state or st.session_state["period"] == "DEFAULT":
+    if "tmp_file" not in st.session_state:
         st.warning("Cannot display data because no file has been uploaded.")
         return
     # st.write(st.session_state.tmp_file)

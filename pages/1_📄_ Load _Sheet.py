@@ -69,6 +69,7 @@ def process_rules(workbook, progress_bar):
 
 
 def main():
+    del st.session_state.tmp_file
     config = configparser.ConfigParser()
     config.read("config.ini")
     # crear st stare de config y de la key que seleccione en el dropdown
