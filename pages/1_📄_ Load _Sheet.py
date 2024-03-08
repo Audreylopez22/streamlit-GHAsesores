@@ -1,9 +1,12 @@
 import streamlit as st
 import openpyxl
 from tools import log_message
+import os
 from io import BytesIO
 import importlib
+import formulas
 import configparser
+from tempfile import NamedTemporaryFile
 
 
 st.set_page_config(page_title="Load Sheet", page_icon="📑", layout="wide")
@@ -24,6 +27,7 @@ welcome = "Welcome to GH Asesores payroll Processor!"
 
 st.markdown(f"# {welcome}")
 st.sidebar.header(welcome)
+st.session_state.tmp_file = None
 
 st.write(
     """ Here you can upload your Excel file to perform various operations. Start by selecting your file using the 'Upload Excel File' button. The application will automatically check if the file contains the necessary data. If so, it will proceed to calculate overtime hours and surcharges for each employee, depending on the number of weeks included in the file."""
@@ -65,6 +69,7 @@ def process_rules(workbook, progress_bar):
 
 
 def main():
+    del st.session_state.tmp_file
     config = configparser.ConfigParser()
     config.read("config.ini")
     # crear st stare de config y de la key que seleccione en el dropdown
@@ -86,11 +91,14 @@ def main():
 
     st.write("You selected:", period)
 
+    if os.path.exists("/tmp"):
+        for file in os.listdir("/tmp"):
+            if file.endswith((".xlsx", ".XLSX", ".pdf", ".PDF")):
+                os.unlink(os.path.join(os.sep, "tmp", file))
+
     uploaded_file = st.file_uploader("Upload Excel File", type=["xlsx", "xls"])
 
     if uploaded_file is not None:
-        # to reset the session state when analizyded new information
-
         uploaded_file_contents = uploaded_file.read()
 
         if "file_hash" not in st.session_state or st.session_state.file_hash != hash(
@@ -124,6 +132,15 @@ def main():
             modified_file = BytesIO()
             log_message("Saving modifications to the Excel file...")
             workbook.save(modified_file)
+
+            with NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp_file:
+                st.session_state.tmp_file = tmp_file.name
+                workbook.save(tmp_file.name)
+
+            log_message("Loading...")
+            xl_model = formulas.ExcelModel().loads(st.session_state.tmp_file).finish()
+            xl_model.calculate()
+            xl_model.write(dirpath="/tmp")
 
             # download button for the downloaded file that is in memory
             st.session_state.download_button = st.download_button(

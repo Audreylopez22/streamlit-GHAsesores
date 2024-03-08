@@ -49,19 +49,27 @@ def main():
         + " file to your device."
     )
 
+    st.header("Page 2: PDF Download")
+    st.write(
+        "On this page, you will find a list of employees along with download buttons associated with each of them. These buttons allow you to obtain the pay stub for each employee in PDF format. To download the pay stub of a specific employee, simply click on the 'Download' button next to their name. Once you click the button, the PDF file will start downloading to your device. Then, you will have the option to choose the folder where you want to save the file. Simply select the desired location and save the file. Repeat this process for each employee whose pay stub you wish to download."
+    )
+
     # Considerations
     st.header("Important Considerations")
     st.write(
         "1. **Excel File Format:** Ensure that the Excel file contains only one data sheet. The first column should contain the list of collaborators, while the subsequent columns should represent the working days to be analyzed."
     )
     st.write(
-        "2. **Workweek:** The program will only consider workweeks from Monday to Sunday. If a week is incomplete, it will not be taken into account for calculations."
+        "2. **Workweek:** The program will only consider workweeks from Monday to Sunday. If a week is incomplete, it will not be taken into account for calculations. Additionally, if a week, even if complete, is divided between two tables, the program will not consider it as a complete week and will not include it in the calculations."
     )
     st.write(
         "3. **Entry and Exit Time Format:** It is crucial that entry and exit records follow the 12-hour time format, followed by 'a.m.' or 'p.m.'. For example: 6:00:00 a.m. If the records do not comply with this format, they will not be included in the calculations."
     )
     st.write(
         "4. **Holidays:** The program identifies holidays as those with the cell highlighted with color. It is recommended to avoid highlighting other non-holiday days to avoid altering the calculation of hours worked that are affected by special rates."
+    )
+    st.write(
+        "5. **PDF:** To generate the PDFs per employee, it's necessary to upload the base file to the load sheet and select the period, so that they can be generated and the necessary data can be obtained to create the pay stub."
     )
 
     # Streamlit
