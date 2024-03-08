@@ -221,7 +221,6 @@ def main():
         with open(uppercased_file, "rb") as file_content:
             st.session_state.tmp_file_content = file_content.read()
 
-    st.write(st.session_state.tmp_file_content)
     uploaded_file_contents = st.session_state.tmp_file_content
 
     workbook = load_workbook(io.BytesIO(uploaded_file_contents))
