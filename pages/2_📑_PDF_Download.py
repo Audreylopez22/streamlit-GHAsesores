@@ -43,7 +43,7 @@ def date(month):
 
     year_number = re.sub(r"\D", "", year)
 
-    if start_date >= end_date:
+    if int(start_date) >= int(end_date):
         full_start_date = f"{start_date}/{month}/{year_number}"
 
         if month == "12":
@@ -208,7 +208,7 @@ def generar_pdf(data_row, pdf_path, full_start_date, full_end_date):
 
 
 def main():
-    if "tmp_file" not in st.session_state:
+    if "tmp_file" not in st.session_state or st.session_state["period"] == "DEFAULT":
         st.warning("Cannot display data because no file has been uploaded.")
         return
     # st.write(st.session_state.tmp_file)
