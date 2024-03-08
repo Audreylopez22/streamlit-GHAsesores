@@ -91,6 +91,7 @@ def main():
 
     if os.path.exists("/tmp"):
         for file in os.listdir("/tmp"):
+            st.write(os.listdir("/tmp"))
             if file.endswith((".xlsx", ".XLSX", ".pdf", ".PDF")):
                 os.unlink(os.path.join(os.sep, "tmp", file))
 
