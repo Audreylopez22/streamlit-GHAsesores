@@ -44,7 +44,7 @@ def simple_sheet_process(workbook):
                 for sheet in workbook.sheetnames:
                     if sheet.startswith("week"):
                         current_sheet = workbook[sheet]
-                        formula += f"VLOOKUP(A{row_index}, '{current_sheet.title}'!$A$2:$R${current_sheet.max_row}, {column}, FALSE)+"
+                        formula += f"IFERROR(VLOOKUP(A{row_index}, '{current_sheet.title}'!$A$2:$R${current_sheet.max_row}, {column},FALSE),0)+"
 
                 formula = formula.rstrip("+")
                 simple_sheet.cell(row=row_index, column=column, value=formula)
