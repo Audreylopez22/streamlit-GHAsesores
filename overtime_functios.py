@@ -23,6 +23,12 @@ def calculate_night_surcharges_hours(
                 continue
             elif hour_day.hour > config.getint(period, "start_night_limit"):
                 night_surcharges_hours += 1
+            elif (
+                day_key + 2 in holidays
+                and hour_day.hour > 0
+                and hour_day.hour < config.getint(period, "end_night_limit")
+            ):
+                night_holidays_surcharges_hours += 1
             elif night_surcharges_hours > 0 and hour_day.hour < config.getint(
                 period, "end_night_limit"
             ):
@@ -131,6 +137,12 @@ def calculate_night_overtime_and_holydays(
                 total_week_hours += 1
             elif hour_day.hour > config.getint(period, "start_night_limit"):
                 night_overtime_hours += 1
+            elif (
+                day_key + 2 in holidays
+                and hour_day.hour > 0
+                and hour_day.hour < config.getint(period, "end_night_limit")
+            ):
+                night_holidays_overtime_hours += 1
             elif night_overtime_hours > 0 and hour_day.hour < config.getint(
                 period, "end_night_limit"
             ):
