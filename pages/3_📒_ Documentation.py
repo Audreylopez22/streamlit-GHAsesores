@@ -1,3 +1,4 @@
+import sys
 import streamlit as st
 
 st.set_page_config(page_title="GH Asesores", page_icon="📒", layout="wide")
@@ -17,6 +18,8 @@ if (
 
 def main():
     st.title("Welcome to GH Asesores payroll Processor!")
+
+    st.write("Python Version: ", sys.version)
 
     # Description
     st.header("Description")

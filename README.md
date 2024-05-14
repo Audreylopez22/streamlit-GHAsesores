@@ -59,3 +59,16 @@ Openpyxl is a Python library that allows reading and writing Excel files in xlsx
 - **Python 3.x**
 
 - **Libraries:** Streamlit, Openpyxl
+
+# Docker prerequisites
+NodeJS: 19.6.0
+
+## Create Docker containers on Windows
+
+Run the following commands in PowerShell from the root of the repository.
+
+`$Env:DATE=$(get-date -Format "yyyyMMdd")`
+
+`docker compose -f docker/docker-compose.yml --project-directory $(pwd) up -d`
+
+### End

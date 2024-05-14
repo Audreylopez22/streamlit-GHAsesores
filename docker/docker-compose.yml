@@ -1,0 +1,23 @@
+version: "3.8"
+
+networks:
+  streamlitdockergh:
+    name: streamlitdockergh
+    driver: bridge
+
+services:
+  streamlit:
+    image: "streamlit/gh_asesores:${DATE:-latest}"
+    container_name: streamlit_GHAsesores
+    hostname: streamlit_GHAsesores
+    pull_policy: never
+    tty: true
+    ports:
+      - "8501:8501"
+    build:
+      context: .
+      dockerfile: docker/streamlit_ghasesores/streamlit_ghasesores.df
+    networks:
+      - streamlitdockergh
+    volumes:
+      - ".:/app"
