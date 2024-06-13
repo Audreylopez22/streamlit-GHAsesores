@@ -1,0 +1,39 @@
+version: "3.8"
+
+networks:
+  streamlitdockergh:
+    name: streamlitdockergh
+    driver: bridge
+
+services:
+  streamlit:
+    image: "streamlit/gh_asesores:${DATE:-latest}"
+    container_name: streamlit_GHAsesores
+    hostname: streamlit_GHAsesores
+    pull_policy: never
+    tty: true
+    ports:
+      - "8501:8501"
+    build:
+      context: .
+      dockerfile: docker/streamlit_ghasesores/streamlit_ghasesores.df
+    networks:
+      - streamlitdockergh
+    volumes:
+      - ".:/app"
+
+  cypress:
+    image: "cypress/gh_asesores:${DATE:-latest}"
+    container_name: cypress_GHAsesores
+    hostname: cypress_GHAsesores
+    pull_policy: never
+    tty: true
+    ports:
+      - "8080:8080"
+    build:
+      context: .
+      dockerfile: docker/streamlit_ghasesores/cypress.df
+    networks:
+      - streamlitdockergh
+    volumes:
+      - ".:/app"
