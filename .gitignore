@@ -4,3 +4,4 @@
 # We don't want these files to be tracked by Git or included in the remote repository
 # for security reasons and to avoid exposing sensitive information.
 .streamlit/
+.pyc
