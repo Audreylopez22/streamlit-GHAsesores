@@ -278,6 +278,7 @@ def extract_data(sheet, weeks_info):
 
                     # Trae el limite de horas por semana del archivo de configuracion
 
+                else:
                     extracted_data[week_name][employe_name] = {
                         "hour_rate": hour_rate,
                         "salary": employe_salary,

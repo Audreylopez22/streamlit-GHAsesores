@@ -5,3 +5,4 @@
 # for security reasons and to avoid exposing sensitive information.
 .streamlit/
 .pyc
+
