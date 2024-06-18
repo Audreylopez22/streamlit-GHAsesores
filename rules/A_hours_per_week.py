@@ -168,6 +168,25 @@ def extract_data(sheet, weeks_info):
 
                     except Exception as error:
                         print(error)
+                        extracted_data[week_name][employe_name] = {
+                            "hour_rate": hour_rate,
+                            "salary": employe_salary,
+                            "total_hours": total_week_hours,
+                            "night_surchage_hours": total_night_surcharges,
+                            "night_surchage_pay": night_surchage_week,
+                            "night_holidays_surcharges_hours": night_holidays_surchage_week,
+                            "night_holidays_surchage_pay": total_night_holidays_surcharges,
+                            "day_holidays_surcharges_hours": holidays_surchage_week,
+                            "day_holidays_surchage_pay": total_holidays_surchages,
+                            "night_overtime_hours": total_night_overtime,
+                            "night_overtime_pay": night_overtime_week,
+                            "night_holidays_overtime_hours": holidays_night_overtime_week,
+                            "night_holidays_overtime_pay": total_holidays_night_overtime,
+                            "daytime_holidays_hours": daytime_holidays_week,
+                            "daytime_holidays_pay": total_daytime_holidays,
+                            "daytime_overtime_hours": daytime_overtime_week,
+                            "daytime_overtime_pay": total_daytime_overtime,
+                        }
                         continue
 
                     worked_hours = abs((exit_datetime - entry_datetime).total_seconds() / 3600)
@@ -259,6 +278,7 @@ def extract_data(sheet, weeks_info):
 
                     # Trae el limite de horas por semana del archivo de configuracion
 
+                else:
                     extracted_data[week_name][employe_name] = {
                         "hour_rate": hour_rate,
                         "salary": employe_salary,
